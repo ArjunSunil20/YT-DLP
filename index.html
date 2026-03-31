@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ytdl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --border: #222;
+    --border-light: #2a2a2a;
+    --text: #e8e8e8;
+    --muted: #555;
+    --accent: #e8e8e8;
+    --green: #4ade80;
+    --red: #f87171;
+    --yellow: #fbbf24;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 80px 24px 60px;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 60px;
+  }
+
+  .logo span {
+    color: var(--text);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .headline {
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 40px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 300;
+    padding: 12px 16px;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input[type="text"]::placeholder { color: var(--muted); }
+  input[type="text"]:focus { border-color: var(--border-light); }
+
+  button {
+    cursor: pointer;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    transition: opacity 0.15s, background 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--text);
+    color: var(--bg);
+    padding: 12px 20px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.35; cursor: default; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    font-weight: 300;
+  }
+
+  .btn-ghost:hover { border-color: var(--border-light); color: var(--text); }
+
+  /* Options */
+  .options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .option-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .option-pill:hover { border-color: var(--border-light); color: var(--text); }
+  .option-pill.active { border-color: var(--text); color: var(--text); }
+  .option-pill.active .dot { background: var(--text); }
+
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.15s;
+  }
+
+  /* Select */
+  select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 100px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    padding-right: 24px;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23555' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: border-color 0.15s;
+  }
+
+  select:focus { border-color: var(--border-light); color: var(--text); }
+
+  /* Job card */
+  .jobs { display: flex; flex-direction: column; gap: 12px; }
+
+  .job-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .job-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .job-info { flex: 1; min-width: 0; }
+
+  .job-url {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+
+  .job-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-dot.pending { background: var(--muted); }
+  .status-dot.running { background: var(--yellow); animation: pulse 1.2s ease-in-out infinite; }
+  .status-dot.done { background: var(--green); }
+  .status-dot.error { background: var(--red); }
+  .status-dot.cancelled { background: var(--muted); }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .status-text {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .progress-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .job-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    height: 2px;
+    background: var(--border);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--text);
+    transition: width 0.4s ease;
+  }
+
+  .progress-bar-fill.done { background: var(--green); }
+  .progress-bar-fill.error { background: var(--red); }
+
+  /* Log panel */
+  .log-panel {
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    max-height: 180px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .log-panel.open { display: block; }
+
+  .log-line {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .log-line.highlight { color: var(--text); }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 40px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="logo">yt<span>dl</span> — channel downloader</div>
+
+<div class="container">
+
+  <h1 class="headline">Download a<br>YouTube channel.</h1>
+  <p class="sub">// powered by yt-dlp</p>
+
+  <div class="input-row">
+    <input type="text" id="urlInput" placeholder="https://www.youtube.com/@channel" />
+    <button class="btn-primary" id="downloadBtn" onclick="startDownload()">Download</button>
+  </div>
+
+  <div class="options">
+    <div class="option-pill" id="pill-audio" onclick="togglePill('audio')">
+      <span class="dot"></span> audio only
+    </div>
+    <div class="option-pill active" id="pill-shorts" onclick="togglePill('shorts')">
+      <span class="dot"></span> skip shorts
+    </div>
+    <select id="qualitySelect">
+      <option value="2160">4K</option>
+      <option value="1080" selected>1080p</option>
+      <option value="720">720p</option>
+      <option value="480">480p</option>
+      <option value="360">360p</option>
+    </select>
+  </div>
+
+  <div id="jobsSection" style="display:none">
+    <hr class="divider">
+    <div class="section-label">Downloads</div>
+    <div class="jobs" id="jobsList"></div>
+  </div>
+
+</div>
+
+<script>
+  const jobs = {};
+
+  const pillState = { audio: false, shorts: true };
+
+  function togglePill(key) {
+    pillState[key] = !pillState[key];
+    const el = document.getElementById('pill-' + key);
+    el.classList.toggle('active', pillState[key]);
+    el.querySelector('.dot').style.background = pillState[key] ? 'var(--text)' : 'var(--muted)';
+  }
+
+  async function startDownload() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) return;
+
+    const btn = document.getElementById('downloadBtn');
+    btn.disabled = true;
+
+    const options = {
+      audioOnly: pillState.audio,
+      skipShorts: pillState.shorts,
+      quality: document.getElementById('qualitySelect').value
+    };
+
+    try {
+      const res = await fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, options })
+      });
+      const data = await res.json();
+      if (data.jobId) {
+        addJobCard(data.jobId, url);
+        pollJob(data.jobId);
+      }
+    } catch (e) {
+      alert('Could not connect to backend. Is the server running?');
+    } finally {
+      btn.disabled = false;
+      document.getElementById('urlInput').value = '';
+    }
+  }
+
+  document.getElementById('urlInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startDownload();
+  });
+
+  function addJobCard(jobId, url) {
+    document.getElementById('jobsSection').style.display = 'block';
+    jobs[jobId] = { url, logOpen: false };
+
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    card.id = 'job-' + jobId;
+    card.innerHTML = `
+      <div class="job-header">
+        <div class="job-info">
+          <div class="job-url">${escHtml(url)}</div>
+          <div class="job-status-row">
+            <div class="status-dot pending" id="dot-${jobId}"></div>
+            <span class="status-text" id="statusText-${jobId}">pending...</span>
+            <span class="progress-pct" id="pct-${jobId}"></span>
+          </div>
+        </div>
+        <div class="job-actions">
+          <button class="btn-ghost" onclick="toggleLog('${jobId}')">logs</button>
+          <button class="btn-ghost" id="cancelBtn-${jobId}" onclick="cancelJob('${jobId}')">stop</button>
+        </div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="bar-${jobId}" style="width:0%"></div>
+      </div>
+      <div class="log-panel" id="log-${jobId}"></div>
+    `;
+    document.getElementById('jobsList').prepend(card);
+  }
+
+  function toggleLog(jobId) {
+    const panel = document.getElementById('log-' + jobId);
+    jobs[jobId].logOpen = !jobs[jobId].logOpen;
+    panel.classList.toggle('open', jobs[jobId].logOpen);
+  }
+
+  async function cancelJob(jobId) {
+    await fetch('/api/cancel/' + jobId, { method: 'POST' });
+    updateCard(jobId, { status: 'cancelled', logs: [], progress: 0 });
+  }
+
+  function pollJob(jobId) {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/status/' + jobId);
+        const data = await res.json();
+        updateCard(jobId, data);
+        if (data.status === 'done' || data.status === 'error' || data.status === 'cancelled') {
+          clearInterval(interval);
+        }
+      } catch (e) {
+        clearInterval(interval);
+      }
+    }, 800);
+  }
+
+  function updateCard(jobId, data) {
+    const dot = document.getElementById('dot-' + jobId);
+    const statusText = document.getElementById('statusText-' + jobId);
+    const pct = document.getElementById('pct-' + jobId);
+    const bar = document.getElementById('bar-' + jobId);
+    const logPanel = document.getElementById('log-' + jobId);
+    const cancelBtn = document.getElementById('cancelBtn-' + jobId);
+
+    const s = data.status;
+    dot.className = 'status-dot ' + s;
+
+    const labels = { pending: 'pending...', running: 'downloading', done: 'complete', error: 'error', cancelled: 'stopped' };
+    statusText.textContent = labels[s] || s;
+
+    if (s === 'running' && data.progress > 0) {
+      pct.textContent = data.progress + '%';
+      bar.style.width = data.progress + '%';
+    } else if (s === 'done') {
+      pct.textContent = '100%';
+      bar.style.width = '100%';
+      bar.classList.add('done');
+    } else if (s === 'error') {
+      bar.classList.add('error');
+      pct.textContent = '';
+    }
+
+    if (s === 'done' || s === 'error' || s === 'cancelled') {
+      cancelBtn.style.display = 'none';
+    }
+
+    if (data.logs && data.logs.length) {
+      logPanel.innerHTML = data.logs.map(l => {
+        const isHighlight = l.includes('[download]') || l.includes('[info]');
+        return `<div class="log-line${isHighlight ? ' highlight' : ''}">${escHtml(l)}</div>`;
+      }).join('');
+      if (jobs[jobId]?.logOpen) {
+        logPanel.scrollTop = logPanel.scrollHeight;
+      }
+    }
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+
+</body>
+</html>
