@@ -149,4 +149,11 @@ def cancel_job(job_id):
     return jsonify({'ok': True})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5050)
+    host = os.getenv('HOST', '0.0.0.0')
+    port = int(os.getenv('PORT', '5050'))
+
+    try:
+        from waitress import serve
+        serve(app, host=host, port=port)
+    except ImportError:
+        app.run(host=host, port=port, debug=False)
